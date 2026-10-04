@@ -4,6 +4,10 @@
     <header class="topbar">
       <div class="topbar-inner">
         <h1 class="logo">校园社团管理</h1>
+        <nav class="nav">
+          <router-link to="/clubList" class="active">社团</router-link>
+          <router-link to="/activityList">活动</router-link>
+        </nav>
         <div class="topbar-right">
           <template v-if="userStore.isLogin">
             <span class="welcome">{{ userStore.realName }}</span>
@@ -178,6 +182,23 @@ onMounted(load)
   font-size: 18px;
   margin: 0;
   color: #409eff;
+}
+.nav {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+}
+.nav a {
+  color: #606266;
+  text-decoration: none;
+  font-size: 14px;
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+}
+.nav a.active,
+.nav a:hover {
+  color: #409eff;
+  border-bottom-color: #409eff;
 }
 .welcome {
   margin-right: 12px;
