@@ -2,12 +2,14 @@ package com.club.service;
 
 import com.club.constant.TimeSlots;
 import com.club.mapper.StatsMapper;
+import com.club.util.CsvWriter;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -31,6 +33,10 @@ import java.util.Map;
  * </ul>
  *
  * <p>指标严格对应设计说明书的三项, 不额外输出无数据来源的字段。
+ *
+ * <p>另提供 {@link #exportCsv()} 对应表 2-8 的 export: 将三组指标导出为 CSV 文本,
+ * 由控制层写入响应流。设计文档中的 FileStorage 辅助类用于文件落盘, 本项目以
+ * 流式导出替代, 不引入存储目录。
  */
 @Service
 public class StatsService {
@@ -186,6 +192,86 @@ public class StatsService {
     }
 
     // ==================================================================
+    // 报表导出(设计说明书 表 2-8 的 export)
+    // ==================================================================
+
+    /**
+     * 将三组指标导出为 CSV 文本(含 UTF-8 BOM, Excel 可直接双击打开)。
+     *
+     * <p>设计说明书表 2-8 中该能力由 FileStorage 辅助类承担; 本项目不落地文件,
+     * 而是把 CSV 内容直接写回 HTTP 响应流, 省去文件落盘、清理与存储目录配置。
+     * 导出内容与看板完全同源(复用 {@link #overview()}), 不会出现"页面一个数、
+     * 导出另一个数"的不一致。
+     */
+    public String exportCsv() {
+        Map<String, Object> all = overview();
+        Map<String, Object> club = asMap(all.get("clubStats"));
+        Map<String, Object> act = asMap(all.get("activityStats"));
+        Map<String, Object> ven = asMap(all.get("venueStats"));
+
+        CsvWriter csv = new CsvWriter();
+        csv.title("校园社团综合管理系统 - 数据统计报表");
+        csv.row("生成时间", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        csv.row("统计口径", "社团活跃度 / 活动参与率 / 场地使用率");
+        csv.blank();
+
+        // ---- 维度一: 社团活跃度 ----
+        csv.title("一、社团活跃度（成员规模 60% + 活动频次 40%，按全体最大值归一化，满分 100）");
+        csv.row("指标", "数值");
+        csv.row("社团总数", club.get("total"));
+        csv.row("活跃社团数(得分≥" + ACTIVE_SCORE_THRESHOLD + ")", club.get("activeClubs"));
+        csv.row("平均成员数", club.get("avgMembers"));
+        csv.blank();
+        csv.title("活跃度 Top3");
+        csv.row("排名", "社团名称", "成员数", "活动数", "活跃度得分");
+        appendRanked(csv, asList(club.get("top3")), "clubName", "memberCount", "activityCount", "score");
+        csv.blank();
+
+        // ---- 维度二: 活动参与率 ----
+        csv.title("二、活动参与率（已签到人数 / 名额）");
+        csv.row("指标", "数值");
+        csv.row("活动总数", act.get("total"));
+        csv.row("本月活动数", act.get("monthCount"));
+        csv.row("平均报名率", act.get("avgSignupRate"));
+        csv.row("名额总数", act.get("capacityTotal"));
+        csv.row("已签到人数", act.get("checkedInTotal"));
+        csv.blank();
+
+        // ---- 维度三: 场地使用率 ----
+        csv.title("三、场地使用率（已通过时段数 / (在用场地数 × " + TimeSlots.PER_DAY
+                + " 时段 × " + USAGE_WINDOW_DAYS + " 天)）");
+        csv.row("指标", "数值");
+        csv.row("在用场地数", ven.get("total"));
+        csv.row("统计窗口(天)", ven.get("windowDays"));
+        csv.row("已占用时段", ven.get("usedSlots"));
+        csv.row("可预约时段总数", ven.get("slotsTotal"));
+        csv.row("使用率", ven.get("usageRate"));
+        csv.blank();
+        csv.title("占用 Top3 场地");
+        csv.row("排名", "场地名称", "已占时段数");
+        appendRanked(csv, asList(ven.get("top3")), "venueName", "usedSlots");
+
+        return csv.build();
+    }
+
+    /** 按给定字段顺序输出排名明细, 无数据时输出一行占位说明 */
+    private static void appendRanked(CsvWriter csv, List<Map<String, Object>> items, String... keys) {
+        if (items == null || items.isEmpty()) {
+            csv.row("（暂无数据）");
+            return;
+        }
+        int rank = 1;
+        for (Map<String, Object> item : items) {
+            Object[] cells = new Object[keys.length + 1];
+            cells[0] = rank++;
+            for (int i = 0; i < keys.length; i++) {
+                cells[i + 1] = item.get(keys[i]);
+            }
+            csv.row(cells);
+        }
+    }
+
+    // ==================================================================
     // 工具方法
     // ==================================================================
 
@@ -206,5 +292,17 @@ public class StatsService {
 
     private static double toDouble(Object v) {
         return v instanceof Number ? ((Number) v).doubleValue() : 0.0;
+    }
+
+    /** overview() 取出的嵌套结构统一转 Map, 类型不符时返回空 Map, 供导出方法安全取值 */
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> asMap(Object value) {
+        return value instanceof Map ? (Map<String, Object>) value : new HashMap<String, Object>();
+    }
+
+    /** overview() 取出的 top3 列表转 List, 缺失或类型不符时返回 null */
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> asList(Object value) {
+        return value instanceof List ? (List<Map<String, Object>>) value : null;
     }
 }

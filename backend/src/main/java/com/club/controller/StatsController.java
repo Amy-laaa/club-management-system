@@ -8,6 +8,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 /**
@@ -16,10 +20,10 @@ import java.util.Map;
  *   GET /api/admin/stats/clubs        社团活跃度
  *   GET /api/admin/stats/activities   活动参与率
  *   GET /api/admin/stats/venues       场地使用率
+ *   GET /api/admin/stats/export       报表导出(CSV 附件下载)
  *
  * <p>只读聚合接口, 全部为 GET; 仅社联管理员 / 系统管理员可访问。
- * <p>说明: 表 2-8 中的 export(报表文件导出) 依赖 FileStorage 桩, 本期未纳入
- * 接口契约, 故未实现, 前端如需导出可先用浏览器打印/前端导出。
+ * <p>export 以流式 CSV 下载实现, 不落地文件, 故不再依赖 FileStorage 桩。
  */
 @RestController
 public class StatsController {
@@ -64,6 +68,34 @@ public class StatsController {
     public Result<Map<String, Object>> venueStats(HttpServletRequest request) {
         Result<Map<String, Object>> denied = guard(request);
         return denied != null ? denied : Result.ok(statsService.venueStats());
+    }
+
+    /**
+     * 报表导出: 三组指标导出为 CSV 附件下载(设计说明书 表 2-8 的 export)。
+     *
+     * <p>该接口返回文件流而非统一 JSON 包装, 因此直接操作响应对象; 权限不足时
+     * 仍返回 JSON 结构, 便于前端沿用统一的错误处理分支。
+     * <p>文件名使用纯 ASCII(stats-yyyyMMdd.csv), 避免 Content-Disposition 头
+     * 需要 RFC 5987 编码; 中文由文件内容本身承担。
+     */
+    @GetMapping("/api/admin/stats/export")
+    public void export(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setStatus(200);
+        response.setCharacterEncoding("UTF-8");
+
+        Result<Map<String, Object>> denied = guard(request);
+        if (denied != null) {
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"code\":" + denied.getCode()
+                    + ",\"message\":\"" + denied.getMessage() + "\",\"data\":null}");
+            return;
+        }
+
+        String filename = "stats-" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".csv";
+        response.setContentType("text/csv;charset=UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+        response.getWriter().write(statsService.exportCsv());
+        response.getWriter().flush();
     }
 
     /**
