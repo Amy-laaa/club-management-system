@@ -13,6 +13,9 @@
             <router-link to="/myRegistrations">
               <el-button text>我的报名</el-button>
             </router-link>
+            <router-link v-if="userStore.role === 'LEADER'" to="/checkIn">
+              <el-button text>签到核销</el-button>
+            </router-link>
             <el-button text @click="logout">退出</el-button>
           </template>
           <template v-else>
