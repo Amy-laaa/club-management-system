@@ -31,16 +31,15 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        // 注意: 只排除认证接口。GET 匿名浏览(/api/clubs、/api/activities)
+        // 改由 AuthInterceptor 内部按"路径+GET方法"双重判断放行,
+        // 避免同路径的 POST(报名/签到/发布)绕过登录校验。
         registry.addInterceptor(authInterceptor)
                 .addPathPatterns("/api/**")
                 .excludePathPatterns(
                         "/api/auth/login",
                         "/api/auth/register",
-                        "/api/auth/captcha",          // 获取验证码(模拟短信)
-                        "/api/clubs",                  // GET 社团列表(匿名)
-                        "/api/clubs/*",                // GET 社团详情(匿名)
-                        "/api/activities",             // GET 活动列表(匿名)
-                        "/api/activities/*"            // GET 活动详情(匿名)
+                        "/api/auth/captcha"
                 );
     }
 }
