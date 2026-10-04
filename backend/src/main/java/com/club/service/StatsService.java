@@ -30,8 +30,7 @@ import java.util.Map;
  *       统计窗口 = 今天起 {@value #USAGE_WINDOW_DAYS} 天(未来一个月的预订占用热度)。</li>
  * </ul>
  *
- * <p>注: 接口契约中的 avgRating(活动平均评分) 因本期数据库未设评价表而恒为 null,
- * 字段保留以便后续扩展(评价功能落地后只需补一张 t_rating 并填充此处)。
+ * <p>指标严格对应设计说明书的三项, 不额外输出无数据来源的字段。
  */
 @Service
 public class StatsService {
@@ -143,7 +142,6 @@ public class StatsService {
         activityStats.put("avgSignupRate", round(signupRate, 2));
         activityStats.put("capacityTotal", totalCapacity);      // 口径明细, 便于前端展示 "41/53 人"
         activityStats.put("checkedInTotal", totalCheckedIn);
-        activityStats.put("avgRating", null);                   // 本期无评价表, 预留字段
         return activityStats;
     }
 
