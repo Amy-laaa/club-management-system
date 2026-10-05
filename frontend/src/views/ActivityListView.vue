@@ -25,6 +25,9 @@
             <router-link v-if="['UNION_ADMIN','SYS_ADMIN'].includes(userStore.role)" to="/applyList">
               <el-button text>审批工作台</el-button>
             </router-link>
+            <router-link v-if="['UNION_ADMIN','SYS_ADMIN'].includes(userStore.role)" to="/stats">
+              <el-button text>数据统计</el-button>
+            </router-link>
             <el-button text @click="logout">退出</el-button>
           </template>
           <template v-else>
