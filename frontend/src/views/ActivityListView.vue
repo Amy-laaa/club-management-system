@@ -22,6 +22,9 @@
             <router-link v-if="userStore.role === 'LEADER'" to="/venueApply">
               <el-button text>场地申请</el-button>
             </router-link>
+            <router-link v-if="['UNION_ADMIN','SYS_ADMIN'].includes(userStore.role)" to="/applyList">
+              <el-button text>审批工作台</el-button>
+            </router-link>
             <el-button text @click="logout">退出</el-button>
           </template>
           <template v-else>
