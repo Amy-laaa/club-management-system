@@ -105,6 +105,21 @@ public class MembershipService {
         return data;
     }
 
+    /** 社长: 本社团正式成员名单分页(成员管理页, status=1) */
+    public Map<String, Object> memberList(Long clubId, Long operatorId, int page, int size) {
+        requireClubLeader(clubId, operatorId);
+        if (page < 1) page = 1;
+        if (size < 1 || size > 50) size = 10;
+        long total = membershipMapper.countByClub(clubId, 1);
+        List<Membership> rows = membershipMapper.selectPageByClub(clubId, 1, (page - 1) * size, size);
+        Map<String, Object> data = new HashMap<>();
+        data.put("total", total);
+        data.put("page", page);
+        data.put("size", size);
+        data.put("rows", rows);
+        return data;
+    }
+
     /** 校验 operatorId 是 clubId 的负责人 */
     private void requireClubLeader(Long clubId, Long operatorId) {
         Club club = clubMapper.selectById(clubId);

@@ -14,6 +14,7 @@ import java.util.Map;
  *   GET  /api/memberships/mine                 我的社团与申请(学生)
  *   GET  /api/club/memberships?clubId=1        社团待审核申请列表(社长)
  *   POST /api/club/memberships/{id}/audit      审批入社(社长)
+ *   GET  /api/clubs/{id}/members               社团正式成员名单(社长, 成员管理页)
  */
 @RestController
 public class MembershipController {
@@ -54,5 +55,20 @@ public class MembershipController {
         }
         membershipService.audit(id, dto, user.getUserId());
         return Result.ok(null);
+    }
+
+    /**
+     * 社长查看本社团正式成员名单(成员管理页)。
+     * GET /api/clubs/{id}/members?page=&size=
+     */
+    @GetMapping("/api/clubs/{id}/members")
+    public Result<Map<String, Object>> memberList(@PathVariable("id") Long clubId,
+                                                   @RequestParam(defaultValue = "1") int page,
+                                                   @RequestParam(defaultValue = "10") int size) {
+        UserContext.CurrentUser user = UserContext.get();
+        if (user == null) {
+            return Result.error(401, "请先登录");
+        }
+        return Result.ok(membershipService.memberList(clubId, user.getUserId(), page, size));
     }
 }

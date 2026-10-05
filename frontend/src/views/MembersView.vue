@@ -38,8 +38,8 @@
             <span class="label">待审核入社申请</span>
           </div>
           <div class="stat-card">
-            <span class="num muted">—</span>
-            <span class="label">正式成员（接口待补）</span>
+            <span class="num">{{ memberTotal }}</span>
+            <span class="label">正式成员</span>
           </div>
           <div class="stat-card">
             <span class="num">{{ leaderClubs.length }}</span>
@@ -68,33 +68,42 @@
           </div>
         </el-card>
 
-        <!-- 正式成员名单：后端缺口显性化 -->
+        <!-- 正式成员名单（GET /api/clubs/{clubId}/members） -->
         <el-card class="block" shadow="never">
           <div class="block-head">
-            <span class="block-title">正式成员名单</span>
-            <el-tag type="warning" size="small" effect="light">后端接口未实现</el-tag>
+            <span class="block-title">正式成员名单（{{ memberTotal }} 人）</span>
+            <el-button size="small" @click="loadMembers">刷新</el-button>
           </div>
 
-          <el-alert
-            type="warning"
-            :closable="false"
-            show-icon
-            title="成员名单查询接口缺失"
-            description="t_membership 表已建好、数据齐全（含角色、入社时间），但后端仅提供 status=0 的待审核申请查询，没有 status=1 的正式成员名单接口，因此本区域暂无法渲染真实名单。已按表 2-13 拟定下列契约，待后端实现后前端无需改结构、直接接数据。"
-          />
-
-          <el-table :data="suggestedApis" size="small" border class="api-table">
-            <el-table-column prop="method" label="方法" width="80" />
-            <el-table-column prop="path" label="路径" min-width="300" />
-            <el-table-column prop="desc" label="说明" min-width="220" />
-            <el-table-column prop="role" label="权限" width="100" />
+          <el-table :data="memberRows" v-loading="memberLoading" size="small" border>
+            <el-table-column type="index" label="#" width="50" align="center"
+              :index="(i) => (memberPage - 1) * memberSize + i + 1" />
+            <el-table-column prop="realName" label="姓名" width="110" />
+            <el-table-column label="学号" width="130">
+              <template #default="{ row }">{{ maskStudentNo(row.studentNo) }}</template>
+            </el-table-column>
+            <el-table-column label="角色" width="130">
+              <template #default="{ row }">
+                <el-tag v-if="row.memberRole === 'LEADER'" type="warning" size="small">社长</el-tag>
+                <el-tag v-else-if="row.memberRole === 'ADMIN'" type="primary" size="small">管理员</el-tag>
+                <el-tag v-else type="info" size="small">成员</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="joinedAt" label="入社时间" min-width="170">
+              <template #default="{ row }">{{ (row.joinedAt || '').replace('T', ' ') }}</template>
+            </el-table-column>
+            <el-table-column prop="applyReason" label="申请理由" min-width="200" show-overflow-tooltip />
           </el-table>
 
-          <div class="block-body gap-note">
-            替代方案：也可复用 <span class="mono">GET /api/clubs/{clubId}</span> 增加
-            <span class="mono">memberCount</span> 统计字段（当前该字段返回 null），
-            先支撑"成员规模"展示，再补名单接口。
-          </div>
+          <el-pagination
+            v-if="memberTotal > memberSize"
+            class="pager"
+            layout="prev, pager, next, total"
+            :total="memberTotal"
+            :page-size="memberSize"
+            :current-page="memberPage"
+            @current-change="onMemberPage"
+          />
         </el-card>
 
         <!-- 角色与状态说明 -->
@@ -112,10 +121,11 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { listMyMemberships, listPendingMemberships } from '../api/membership'
+import { listMyMemberships, listPendingMemberships, listClubMembers } from '../api/membership'
+import { maskStudentNo } from '../utils/mask'
 import { useUserStore } from '../stores/user'
 
 const router = useRouter()
@@ -126,12 +136,12 @@ const leaderClubs = ref([])
 const clubId = ref(null)
 const pendingTotal = ref(0)
 
-/** 建议契约（依据文档表 2-13 与 2.2 节 MVC 资源表） */
-const suggestedApis = [
-  { method: 'GET', path: '/api/clubs/{clubId}/members?status=&page=&size=', desc: '社团成员分页名单（含角色、入社时间、脱敏学号）', role: '社长' },
-  { method: 'POST', path: '/api/club/memberships/{id}/remove', desc: '移出成员（status → 3 已退出，软删除保留审计）', role: '社长' },
-  { method: 'POST', path: '/api/club/memberships/{id}/role', desc: '调整成员角色 ADMIN/MEMBER', role: '社长' },
-]
+// 正式成员名单（GET /api/clubs/{clubId}/members）
+const memberRows = ref([])
+const memberTotal = ref(0)
+const memberPage = ref(1)
+const memberSize = ref(10)
+const memberLoading = ref(false)
 
 const roleRows = [
   { code: 'LEADER', text: '社长 / 负责人', note: '创建社团者；唯一可审批入社、发布活动、申请场地' },
@@ -153,6 +163,33 @@ async function loadPendingCount() {
     pendingTotal.value = 0
   }
 }
+
+/** 正式成员名单分页 */
+async function loadMembers() {
+  if (!clubId.value) return
+  memberLoading.value = true
+  try {
+    const data = await listClubMembers(clubId.value, { page: memberPage.value, size: memberSize.value })
+    memberRows.value = data.rows || []
+    memberTotal.value = data.total || 0
+  } catch (e) {
+    memberRows.value = []
+    memberTotal.value = 0
+  } finally {
+    memberLoading.value = false
+  }
+}
+
+function onMemberPage(p) {
+  memberPage.value = p
+  loadMembers()
+}
+
+// 切换社团时同步刷新名单
+watch(clubId, () => {
+  memberPage.value = 1
+  loadMembers()
+})
 
 onMounted(async () => {
   if (!userStore.isLogin) {
