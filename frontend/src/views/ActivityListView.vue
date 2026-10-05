@@ -16,6 +16,9 @@
             <router-link v-if="userStore.role === 'LEADER'" to="/checkIn">
               <el-button text>签到核销</el-button>
             </router-link>
+            <router-link v-if="userStore.role === 'LEADER'" to="/activityCreate">
+              <el-button text>发布活动</el-button>
+            </router-link>
             <router-link v-if="userStore.role === 'LEADER'" to="/venueApply">
               <el-button text>场地申请</el-button>
             </router-link>
