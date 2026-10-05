@@ -10,6 +10,9 @@
         <div class="topbar-right">
           <template v-if="userStore.isLogin">
             <span class="welcome">{{ userStore.realName }}</span>
+            <router-link to="/myClubs">
+              <el-button text>我的社团</el-button>
+            </router-link>
             <router-link to="/myRegistrations">
               <el-button text>我的报名</el-button>
             </router-link>

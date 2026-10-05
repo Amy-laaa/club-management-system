@@ -254,7 +254,7 @@ async function loadVenues() {
   loading.value = true
   try {
     const res = await listVenues(selectedDate.value)
-    venues.value = res.data || []
+    venues.value = res || []
   } catch (e) { /* 统一处理 */ } finally {
     loading.value = false
   }
@@ -264,7 +264,7 @@ async function loadMine() {
   if (!userStore.isLogin) return
   try {
     const res = await myVenueApplications()
-    mine.value = res.data || []
+    mine.value = res || []
   } catch (e) { /* 统一处理 */ }
 }
 
@@ -273,7 +273,7 @@ async function loadMyActivities() {
   try {
     // 取自己社团已发布的活动供关联（后端 rows 为活动实体，含 clubId）
     const res = await listActivities({ page: 1, size: 50 })
-    myClubActivities.value = (res.data.rows || [])
+    myClubActivities.value = (res.rows || [])
   } catch (e) { /* 忽略 */ }
 }
 

@@ -1,8 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 /**
- * 路由表：页面清单对齐详细设计说明书表 2-9（16 个页面）
+ * 路由表：页面清单对齐详细设计说明书表 2-9
  * 路径命名：小驼峰，与文档保持零歧义
+ *
+ * 与文档的页面映射说明（答辩可查）：
+ *   clubAudit / activityAudit / venueAudit 三个平台侧审核页 → 合并为 /applyList（三 tab）
+ *   members.html（成员管理）        → /members
+ *   applyList.html（入社审批）      → /memberAudit   ← 与平台审核工作台区分
+ *   myClubs.html（我的社团）        → /myClubs
  */
 const routes = [
   {
@@ -50,6 +56,24 @@ const routes = [
     name: 'myRegistrations',
     component: () => import('../views/MyRegistrationsView.vue'),
     meta: { title: '我的报名' },
+  },
+  {
+    path: '/myClubs',
+    name: 'myClubs',
+    component: () => import('../views/MyClubsView.vue'),
+    meta: { title: '我的社团' },
+  },
+  {
+    path: '/members',
+    name: 'members',
+    component: () => import('../views/MembersView.vue'),
+    meta: { title: '成员管理' },
+  },
+  {
+    path: '/memberAudit',
+    name: 'memberAudit',
+    component: () => import('../views/MemberAuditView.vue'),
+    meta: { title: '入社审批' },
   },
   {
     path: '/clubCreate',

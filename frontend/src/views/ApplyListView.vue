@@ -203,18 +203,18 @@ async function loadTab(tab) {
     if (tab === 'club') {
       clubLoading.value = true
       const res = await listPendingClubs({ page: clubPage.value, size: PAGE_SIZE })
-      clubRows.value = res.data.rows || []
-      clubTotal.value = res.data.total || 0
+      clubRows.value = res.rows || []
+      clubTotal.value = res.total || 0
     } else if (tab === 'activity') {
       activityLoading.value = true
       const res = await listPendingActivities({ page: activityPage.value, size: PAGE_SIZE })
-      activityRows.value = res.data.rows || []
-      activityTotal.value = res.data.total || 0
+      activityRows.value = res.rows || []
+      activityTotal.value = res.total || 0
     } else if (tab === 'venue') {
       venueLoading.value = true
       const res = await listPendingVenueApps({ page: venuePage.value, size: PAGE_SIZE })
-      venueRows.value = res.data.rows || []
-      venueTotal.value = res.data.total || 0
+      venueRows.value = res.rows || []
+      venueTotal.value = res.total || 0
     }
   } catch (e) {
     // 403 非 admin 由统一拦截提示
@@ -262,12 +262,12 @@ async function submitAudit() {
 async function loadCaches() {
   try {
     const res = await listClubs({ page: 1, size: 100 })
-    clubsCache.value = res.data.rows || []
+    clubsCache.value = res.rows || []
   } catch (e) { /* 忽略 */ }
   try {
     const today = new Date().toISOString().slice(0, 10)
     const res = await request.get('/venues', { params: { date: today } })
-    venuesCache.value = res.data || []
+    venuesCache.value = res || []
   } catch (e) { /* 忽略 */ }
 }
 

@@ -11,6 +11,9 @@
         <div class="topbar-right">
           <template v-if="userStore.isLogin">
             <span class="welcome">{{ userStore.realName }}</span>
+            <router-link to="/myClubs">
+              <el-button text>我的社团</el-button>
+            </router-link>
             <router-link v-if="userStore.role === 'LEADER'" to="/clubCreate">
               <el-button text>创建社团</el-button>
             </router-link>

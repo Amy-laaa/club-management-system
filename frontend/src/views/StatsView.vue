@@ -147,7 +147,7 @@ async function load() {
   loading.value = true
   try {
     const res = await statsOverview()
-    s.value = Object.assign(emptyStats(), res.data || {})
+    s.value = Object.assign(emptyStats(), res || {})
   } catch (e) {
     // 401/403 统一提示
   } finally {

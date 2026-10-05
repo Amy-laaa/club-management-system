@@ -225,8 +225,8 @@ async function loadMyClubs() {
     request.get('/clubs', { params: { page: 1, size: 100 } })
   ])
   const clubNameMap = {}
-  for (const c of (clubRes.data.rows || [])) clubNameMap[c.clubId] = c.clubName
-  myClubs.value = (memRes.data || [])
+  for (const c of (clubRes.rows || [])) clubNameMap[c.clubId] = c.clubName
+  myClubs.value = (memRes || [])
     .filter(m => m.memberRole === 'LEADER' && m.status === 1)
     .map(m => ({ clubId: m.clubId, clubName: clubNameMap[m.clubId] || `社团 #${m.clubId}` }))
 }
@@ -234,11 +234,11 @@ async function loadMyClubs() {
 async function loadVenueApps() {
   try {
     const res = await myVenueApplications()
-    approvedVenueApps.value = (res.data || []).filter(v => v.status === 1)
+    approvedVenueApps.value = (res || []).filter(v => v.status === 1)
     // 拉场地名称（需登录接口，失败则显示编号）
     if (approvedVenueApps.value.length) {
       const vRes = await request.get('/venues', { params: { date: approvedVenueApps.value[0].useDate } })
-      venuesCache.value = vRes.data || []
+      venuesCache.value = vRes || []
     }
   } catch (e) { /* 非关键数据 */ }
 }
