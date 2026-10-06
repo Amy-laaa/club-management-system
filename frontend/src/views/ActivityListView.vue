@@ -6,6 +6,7 @@
         <nav class="nav">
           <router-link to="/clubList">社团</router-link>
           <router-link to="/activityList" class="active">活动</router-link>
+          <router-link to="/notice">公告</router-link>
         </nav>
         <div class="topbar-right">
           <template v-if="userStore.isLogin">

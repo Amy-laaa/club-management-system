@@ -6,6 +6,7 @@
       <nav class="nav">
         <router-link to="/clubList"><el-button text>社团</el-button></router-link>
         <router-link to="/activityList"><el-button text>活动</el-button></router-link>
+        <router-link to="/notice"><el-button text>公告</el-button></router-link>
         <router-link v-if="isAdmin" to="/applyList"><el-button text>审批工作台</el-button></router-link>
       </nav>
       <div class="topbar-right">
