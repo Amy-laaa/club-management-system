@@ -254,6 +254,7 @@ onMounted(() => {
   gap: 24px;
 }
 .logo {
+  margin-right: 32px;
   font-size: 18px;
   margin: 0;
   color: #409eff;
