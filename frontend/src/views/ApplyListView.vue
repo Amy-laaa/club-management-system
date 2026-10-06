@@ -302,9 +302,8 @@ onMounted(async () => {
   border-bottom: 1px solid #e4e7ed;
 }
 .logo {
-  margin-right: 32px;
   font-size: 18px;
-  margin: 0;
+  margin: 0 32px 0 0;
   color: #409eff;
 }
 .nav { display: flex; gap: 4px; }
