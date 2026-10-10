@@ -89,18 +89,6 @@
       >
         <el-button type="primary" @click="$router.push('/clubList')">去社团列表逛逛</el-button>
       </el-empty>
-
-      <el-card class="note-card" shadow="never">
-        <div class="note-title">成员状态说明（文档表 2-13 / 2-21）</div>
-        <div class="note-body">
-          0 待审核：已提交入社申请，等社长审批 ·
-          1 正式成员：审批通过，已写入入社时间 ·
-          2 已拒绝：社长驳回，可直接重新申请 ·
-          3 已退出：主动退社或被动移出，可重新申请。
-          <br />
-          数据库另有 <span class="mono">UNIQUE(user_id, club_id)</span> 约束兜底：同一学生对同一社团只存在一条成员记录，因此"重复申请"在库层即被拒绝。
-        </div>
-      </el-card>
     </main>
   </div>
 </template>
@@ -316,25 +304,6 @@ onMounted(() => {
 }
 .card-actions {
   flex-shrink: 0;
-}
-
-.note-card {
-  margin-top: 20px;
-  background: #fafafa;
-}
-.note-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #303133;
-  margin-bottom: 8px;
-}
-.note-body {
-  font-size: 13px;
-  color: #606266;
-  line-height: 1.9;
-}
-.mono {
-  font-family: Consolas, monospace;
 }
 
 /* 响应式：<768px 单列（文档要求） */
