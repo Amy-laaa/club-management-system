@@ -25,7 +25,7 @@ INSERT INTO t_user (user_id, student_no, real_name, password_hash, mobile, role_
 INSERT INTO t_club (club_id, leader_id, club_name, category, intro, charter, advisor, status, recruit_deadline, created_at) VALUES
 (1, 3, '计算机协会',   '学术', '编程、算法与技术交流社团。', '第一章 总则……', '刘老师', 1, '2026-10-31 23:59:59', '2026-09-05 10:00:00'),
 (2, 4, '街舞社',       '文艺', '热爱街舞，舞台绽放。',       '第一章 总则……', '陈老师', 1, '2026-10-20 23:59:59', '2026-09-05 10:30:00'),
-(3, 5, '羽毛球社(待审)', '体育', '新建申请中的社团。',         '第一章 总则……', '赵老师', 0, NULL, '2026-09-28 11:00:00');
+(3, 5, '羽毛球社', '体育', '以球会友，锻炼身体，欢迎各水平同学加入。', '第一章 总则……', '赵老师', 0, NULL, '2026-09-28 11:00:00');
 
 -- ---------- 成员资格 ----------
 INSERT INTO t_membership (membership_id, user_id, club_id, member_role, apply_reason, status, joined_at, created_at) VALUES
@@ -33,7 +33,8 @@ INSERT INTO t_membership (membership_id, user_id, club_id, member_role, apply_re
 (2, 4, 2, 'LEADER', '创建者', 1, '2026-09-05 10:30:00', '2026-09-05 10:30:00'),
 (3, 5, 1, 'MEMBER', '喜欢编程，希望加入协会学习。', 1, '2026-09-10 12:00:00', '2026-09-09 12:00:00'),
 (4, 6, 1, 'MEMBER', '对算法竞赛感兴趣。',             0, NULL, '2026-09-29 09:00:00'),  -- 待审核入社申请
-(5, 7, 2, 'MEMBER', '想学 Breaking。',               0, NULL, '2026-09-29 10:00:00');  -- 待审核入社申请
+(5, 7, 2, 'MEMBER', '想学 Breaking。',               0, NULL, '2026-09-29 10:00:00'),  -- 待审核入社申请
+(6, 5, 3, 'LEADER', '创建者', 1, '2026-09-28 11:00:00', '2026-09-28 11:00:00'); -- 羽毛球社负责人(与建团流程一致: LEADER 直接正式成员)
 
 -- ---------- 场地 ----------
 INSERT INTO t_venue (venue_id, venue_name, capacity, status, created_at) VALUES
