@@ -105,16 +105,6 @@
             @current-change="onMemberPage"
           />
         </el-card>
-
-        <!-- 角色与状态说明 -->
-        <el-card class="block" shadow="never">
-          <div class="block-head"><span class="block-title">成员角色与状态（文档表 2-13 / 2-21）</span></div>
-          <el-table :data="roleRows" size="small" border>
-            <el-table-column prop="code" label="取值" width="120" />
-            <el-table-column prop="text" label="含义" min-width="220" />
-            <el-table-column prop="note" label="说明" min-width="280" />
-          </el-table>
-        </el-card>
       </template>
     </main>
   </div>
@@ -142,16 +132,6 @@ const memberTotal = ref(0)
 const memberPage = ref(1)
 const memberSize = ref(10)
 const memberLoading = ref(false)
-
-const roleRows = [
-  { code: 'LEADER', text: '社长 / 负责人', note: '创建社团者；唯一可审批入社、发布活动、申请场地' },
-  { code: 'ADMIN', text: '社团管理员', note: '辅助管理（按文档预留，当前后端未开放设置入口）' },
-  { code: 'MEMBER', text: '普通成员', note: '可查看本社团内部活动' },
-  { code: 'status=0', text: '待审核', note: '申请已提交，等待社长审批' },
-  { code: 'status=1', text: '正式成员', note: '审批通过，joined_at 写入时间' },
-  { code: 'status=2', text: '已拒绝', note: '驳回，学生可重新申请' },
-  { code: 'status=3', text: '已退出', note: '主动退出或被移出，可重新申请' },
-]
 
 /** 待审条数：GET /api/club/memberships?clubId=&page=1&size=1 → 只取 total */
 async function loadPendingCount() {
