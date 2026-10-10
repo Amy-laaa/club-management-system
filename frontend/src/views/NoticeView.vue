@@ -24,7 +24,7 @@
       <div class="page-head">
         <div>
           <h2>公告中心</h2>
-          <p class="tip">校级公告与社团公告（文档表 2-9 的 notice 页面，对接契约 #22 #23）</p>
+          <p class="tip">校级公告与社团公告</p>
         </div>
         <el-button v-if="canPublish" type="primary" @click="openPublish">发布公告</el-button>
       </div>
