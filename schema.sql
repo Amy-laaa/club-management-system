@@ -182,7 +182,54 @@ CREATE TABLE t_audit_log (
 ) ENGINE=InnoDB COMMENT='审批与关键操作日志';
 
 -- -------------------------------------------------------------
--- 10. 循环外键: t_activity <-> t_venue_application
+-- 10. 社团负责人资格申请表 t_leader_apply
+--     【文档外扩展】设计说明书 12 个核心用例未含"申请成为负责人",
+--     本表用于落地表 1-1「系统管理员: 账号/角色/权限分配」能力:
+--     学生提交申请 -> 平台管理员审批 -> 通过后 t_user.role_code 升级为 LEADER。
+-- -------------------------------------------------------------
+CREATE TABLE t_leader_apply (
+  apply_id      BIGINT       NOT NULL AUTO_INCREMENT COMMENT '申请编号',
+  user_id       BIGINT       NOT NULL COMMENT '申请人',
+  reason        VARCHAR(200) NULL COMMENT '申请理由',
+  status        TINYINT      NOT NULL DEFAULT 0 COMMENT '0待审核 1已通过 2已拒绝',
+  reviewer_id   BIGINT       NULL COMMENT '审批人',
+  review_remark VARCHAR(255) NULL COMMENT '审批意见',
+  reviewed_at   DATETIME     NULL COMMENT '审批时间',
+  created_at    DATETIME     NOT NULL,
+  PRIMARY KEY (apply_id),
+  KEY ix_user_status (user_id, status),
+  KEY ix_status_time (status, created_at),
+  CONSTRAINT fk_la_user FOREIGN KEY (user_id) REFERENCES t_user (user_id),
+  CONSTRAINT fk_la_reviewer FOREIGN KEY (reviewer_id) REFERENCES t_user (user_id)
+) ENGINE=InnoDB COMMENT='社团负责人资格申请(扩展)';
+
+-- -------------------------------------------------------------
+-- 11. 社团解散申请表 t_club_dissolve
+--     依据表 1-1: 社团负责人"解散社团", 社团联合会管理员"审批社团成立/注销"。
+--     流程: 负责人申请 -> 管理员审批 -> 负责人执行注销(t_club.status = 2)。
+--     状态: 0待审批 1已批准(待执行) 2已驳回 3已注销
+-- -------------------------------------------------------------
+CREATE TABLE t_club_dissolve (
+  dissolve_id   BIGINT       NOT NULL AUTO_INCREMENT COMMENT '解散申请编号',
+  club_id       BIGINT       NOT NULL COMMENT '社团',
+  applicant_id  BIGINT       NOT NULL COMMENT '申请人(负责人)',
+  reason        VARCHAR(200) NULL COMMENT '解散理由',
+  status        TINYINT      NOT NULL DEFAULT 0 COMMENT '0待审批 1已批准 2已驳回 3已注销',
+  reviewer_id   BIGINT       NULL COMMENT '审批人',
+  review_remark VARCHAR(255) NULL COMMENT '审批意见',
+  reviewed_at   DATETIME     NULL COMMENT '审批时间',
+  executed_at   DATETIME     NULL COMMENT '执行注销时间',
+  created_at    DATETIME     NOT NULL,
+  PRIMARY KEY (dissolve_id),
+  KEY ix_club_status (club_id, status),
+  KEY ix_status_time (status, created_at),
+  CONSTRAINT fk_cd_club FOREIGN KEY (club_id) REFERENCES t_club (club_id),
+  CONSTRAINT fk_cd_applicant FOREIGN KEY (applicant_id) REFERENCES t_user (user_id),
+  CONSTRAINT fk_cd_reviewer FOREIGN KEY (reviewer_id) REFERENCES t_user (user_id)
+) ENGINE=InnoDB COMMENT='社团解散申请与审批';
+
+-- -------------------------------------------------------------
+-- 12. 循环外键: t_activity <-> t_venue_application
 --     两表互相引用, 建表后统一补挂
 -- -------------------------------------------------------------
 ALTER TABLE t_activity

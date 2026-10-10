@@ -51,4 +51,8 @@ public interface MembershipMapper {
     /** 正式成员数 */
     @Select("SELECT COUNT(*) FROM t_membership WHERE club_id = #{clubId} AND status = 1")
     int countMembers(@Param("clubId") Long clubId);
+
+    /** 社团注销: 该社团全部生效记录(待审核/正式成员)置为已退出 */
+    @Update("UPDATE t_membership SET status = 3 WHERE club_id = #{clubId} AND status IN (0, 1)")
+    int dissolveAllByClub(@Param("clubId") Long clubId);
 }

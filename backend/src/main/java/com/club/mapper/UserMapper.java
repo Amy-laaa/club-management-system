@@ -25,4 +25,8 @@ public interface UserMapper {
 
     @Update("UPDATE t_user SET last_login_at = NOW() WHERE user_id = #{userId}")
     int touchLogin(@Param("userId") Long userId);
+
+    /** 角色变更: 负责人资格申请审批通过后 STUDENT -> LEADER */
+    @Update("UPDATE t_user SET role_code = #{roleCode} WHERE user_id = #{userId}")
+    int updateRoleCode(@Param("userId") Long userId, @Param("roleCode") String roleCode);
 }

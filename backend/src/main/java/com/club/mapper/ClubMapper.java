@@ -55,4 +55,12 @@ public interface ClubMapper {
     /** 状态迁移: 仅允许 待审核 -> 已成立/已注销, 条件更新防并发 */
     @Update("UPDATE t_club SET status = #{toStatus} WHERE club_id = #{clubId} AND status = 0")
     int updateStatusFromPending(@Param("clubId") Long clubId, @Param("toStatus") Integer toStatus);
+
+    /** 该用户当前负责的「已成立」社团数。角色降级为 STUDENT 前的校验依据 */
+    @Select("SELECT COUNT(*) FROM t_club WHERE leader_id = #{leaderId} AND status = 1")
+    int countActiveByLeader(@Param("leaderId") Long leaderId);
+
+    /** 解散执行: 已成立(1) -> 已注销(2), 条件更新防并发 */
+    @Update("UPDATE t_club SET status = 2 WHERE club_id = #{clubId} AND status = 1")
+    int updateStatusToDissolved(@Param("clubId") Long clubId);
 }
