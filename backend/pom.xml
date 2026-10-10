@@ -20,6 +20,9 @@
 
     <properties>
         <java.version>8</java.version>
+        <!-- 覆盖 Spring Boot 2.7.18 默认的 1.18.30: 旧版 Lombok 在 JDK 21+ 的 IDEA 构建中报
+             ExceptionInInitializerError / TypeTag UNKNOWN, 升级后兼容 JDK 25 -->
+        <lombok.version>1.18.48</lombok.version>
     </properties>
 
     <dependencies>
