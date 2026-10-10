@@ -121,6 +121,18 @@ public class ClubService {
         if (updated == 0) {
             throw BizException.conflict("状态已变更, 请刷新后重试");
         }
+        // 审核通过时防御性补录: 早期版本创建的社团可能缺少社长成员记录,
+        // 导致"我负责的社团"统计为 0, 这里兜底补齐(UNIQUE 约束防重复)
+        if (dto.getResult() == 1 && membershipMapper.countActive(club.getLeaderId(), clubId) == 0) {
+            Membership leaderMs = new Membership();
+            leaderMs.setUserId(club.getLeaderId());
+            leaderMs.setClubId(clubId);
+            leaderMs.setMemberRole("LEADER");
+            leaderMs.setApplyReason("创建者(审核补录)");
+            leaderMs.setStatus(1);        // 直接正式成员
+            leaderMs.setJoinedAt(LocalDateTime.now());
+            membershipMapper.insert(leaderMs);
+        }
         AuditLog log = new AuditLog();
         log.setBizType("CLUB");
         log.setBizId(clubId);
