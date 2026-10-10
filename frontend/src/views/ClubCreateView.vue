@@ -79,7 +79,7 @@
               v-model="form.charter"
               type="textarea"
               :rows="6"
-              placeholder="选填。文档要求创建时提交章程，建议填写以提高审核通过率"
+              placeholder="选填。填写社团章程有助于提高审核通过率"
             />
           </el-form-item>
 
