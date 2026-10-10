@@ -23,6 +23,14 @@
       <div class="page-head">
         <h2>审批工作台</h2>
         <p class="tip">社联管理员统一审核：社团成立 / 公开活动发布 / 场地申请。审批结果写入审计日志</p>
+        <div v-if="isAdmin" class="extra-links">
+          <router-link to="/leaderApply">
+            <el-button size="small">负责人资格申请</el-button>
+          </router-link>
+          <router-link to="/clubDissolve">
+            <el-button size="small">社团解散申请</el-button>
+          </router-link>
+        </div>
       </div>
 
       <el-alert
@@ -316,6 +324,7 @@ onMounted(async () => {
 }
 .page-head h2 { margin: 0 0 4px; }
 .tip { color: #909399; font-size: 13px; margin: 0 0 16px; }
+.extra-links { display: flex; gap: 10px; margin-bottom: 16px; }
 .pager {
   display: flex;
   justify-content: flex-end;

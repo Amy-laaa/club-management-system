@@ -18,6 +18,9 @@
             <router-link v-if="userStore.role === 'LEADER'" to="/clubCreate">
               <el-button text>创建社团</el-button>
             </router-link>
+            <router-link v-if="userStore.role === 'STUDENT'" to="/leaderApply">
+              <el-button text>申请负责人</el-button>
+            </router-link>
             <el-button text @click="logout">退出</el-button>
           </template>
           <template v-else>

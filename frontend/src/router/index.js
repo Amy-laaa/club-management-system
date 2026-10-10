@@ -76,6 +76,18 @@ const routes = [
     meta: { title: '入社审批' },
   },
   {
+    path: '/leaderApply',
+    name: 'leaderApply',
+    component: () => import('../views/LeaderApplyView.vue'),
+    meta: { title: '负责人资格申请' },
+  },
+  {
+    path: '/clubDissolve',
+    name: 'clubDissolve',
+    component: () => import('../views/ClubDissolveView.vue'),
+    meta: { title: '社团解散' },
+  },
+  {
     path: '/clubCreate',
     name: 'clubCreate',
     component: () => import('../views/ClubCreateView.vue'),

@@ -9,6 +9,9 @@
           <router-link v-if="leaderClubs.length" to="/members">
             <el-button text>成员管理</el-button>
           </router-link>
+          <router-link v-if="leaderClubs.length" to="/clubDissolve">
+            <el-button text>解散社团</el-button>
+          </router-link>
         </div>
       </div>
     </header>
