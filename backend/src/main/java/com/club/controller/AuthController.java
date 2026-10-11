@@ -12,7 +12,6 @@ import java.util.Map;
 
 /**
  * 账户认证接口 (附录 A)。
- *   POST /api/auth/captcha  获取验证码(匿名)
  *   POST /api/auth/register 注册(匿名)
  *   POST /api/auth/login    登录(匿名)
  *   POST /api/auth/logout   登出
@@ -25,13 +24,6 @@ public class AuthController {
 
     public AuthController(AuthService authService) {
         this.authService = authService;
-    }
-
-    @PostMapping("/captcha")
-    public Result<Void> captcha(@RequestParam String mobile) {
-        authService.requestCaptcha(mobile);
-        // 桩实现: 验证码在后端日志打印, 演示时看控制台
-        return Result.ok();
     }
 
     @PostMapping("/register")

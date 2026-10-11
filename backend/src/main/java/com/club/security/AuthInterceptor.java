@@ -31,8 +31,7 @@ public class AuthInterceptor implements HandlerInterceptor {
     /** 任意方法都放行的匿名接口(认证本身)。 */
     private static final List<String> ANON_ANY_METHOD = Arrays.asList(
             "/api/auth/login",
-            "/api/auth/register",
-            "/api/auth/captcha"
+            "/api/auth/register"
     );
 
     /** 仅 GET 放行的匿名只读接口(附录A标注匿名的浏览类接口)。 */

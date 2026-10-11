@@ -26,10 +26,6 @@ public class RegisterDTO {
     @Pattern(regexp = "^1\\d{10}$", message = "手机号必须为 11 位")
     private String mobile;
 
-    @NotBlank(message = "验证码不能为空")
-    @Pattern(regexp = "^\\d{6}$", message = "验证码为 6 位数字")
-    private String captcha;
-
     public String getStudentNo() { return studentNo; }
     public void setStudentNo(String studentNo) { this.studentNo = studentNo; }
     public String getRealName() { return realName; }
@@ -38,6 +34,4 @@ public class RegisterDTO {
     public void setPassword(String password) { this.password = password; }
     public String getMobile() { return mobile; }
     public void setMobile(String mobile) { this.mobile = mobile; }
-    public String getCaptcha() { return captcha; }
-    public void setCaptcha(String captcha) { this.captcha = captcha; }
 }

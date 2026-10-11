@@ -5,7 +5,6 @@ import com.club.dto.LoginDTO;
 import com.club.dto.RegisterDTO;
 import com.club.entity.User;
 import com.club.mapper.UserMapper;
-import com.club.stub.SmsClient;
 import com.club.util.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,29 +25,19 @@ public class AuthService {
     private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
     private final UserMapper userMapper;
-    private final SmsClient smsClient;
     private final JwtUtil jwtUtil;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     /** 登录失败计数(演示内存版; 生产放 Redis) */
     private final Map<Long, int[]> failCount = new HashMap<>();
 
-    public AuthService(UserMapper userMapper, SmsClient smsClient, JwtUtil jwtUtil) {
+    public AuthService(UserMapper userMapper, JwtUtil jwtUtil) {
         this.userMapper = userMapper;
-        this.smsClient = smsClient;
         this.jwtUtil = jwtUtil;
     }
 
-    /** 获取模拟短信验证码 */
-    public void requestCaptcha(String mobile) {
-        String err = smsClient.sendCaptcha(mobile);
-        if (err != null) {
-            throw BizException.conflict(err);
-        }
-    }
-
     /**
-     * 注册: 校验唯一性 -> 校验验证码 -> BCrypt 落库。
+     * 注册: 校验唯一性 -> BCrypt 落库。
      */
     @Transactional
     public User register(RegisterDTO dto) {
@@ -57,9 +46,6 @@ public class AuthService {
         }
         if (userMapper.selectByMobile(dto.getMobile()) != null) {
             throw BizException.badRequest("该手机号已被使用");
-        }
-        if (!smsClient.verify(dto.getMobile(), dto.getCaptcha())) {
-            throw BizException.badRequest("验证码错误或已过期");
         }
         User user = new User();
         user.setStudentNo(dto.getStudentNo());
