@@ -95,7 +95,7 @@
         :rows="4"
         maxlength="200"
         show-word-limit
-        placeholder="简要说明你的兴趣或相关经历（选填）"
+        placeholder="简要说明你的兴趣或相关经历"
       />
       <template #footer>
         <el-button @click="applyVisible = false">取消</el-button>
